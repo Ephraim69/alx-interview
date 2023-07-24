@@ -20,37 +20,49 @@ line list = [<IP Address>, -, [<date>], "GET /projects/260 HTTP/1.1",
 <status code>, <file size>]
 """
 
+
 import sys
-import re
-import signal
 
-def print_stats(file_size, status_codes):
-    print("File size: {}".format(file_size))
-    for code in sorted(status_codes.keys()):
-        print("{}: {}".format(code, status_codes[code]))
+# store the count of all status codes in a dictionary
+status_codes_dict = {'200': 0, '301': 0, '400': 0, '401': 0, '403': 0,
+                     '404': 0, '405': 0, '500': 0}
 
-def signal_handler(sig, frame):
-    print_stats(file_size, status_codes)
-    sys.exit(0)
-
-# Register signal handler
-signal.signal(signal.SIGINT, signal_handler)
-
-line_format = re.compile(r'^\S+ - \[\S+\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$')
-file_size = 0
-status_codes = {}
+total_size = 0
+count = 0  # keep count of the number lines counted
 
 try:
-    for i, line in enumerate(sys.stdin, 1):
-        match = line_format.match(line)
-        if match:
-            code, size = match.groups()
-            file_size += int(size)
-            code = int(code)
-            if code in [200, 301, 400, 401, 403, 404, 405, 500]:
-                status_codes[code] = status_codes.get(code, 0) + 1
-        if i % 10 == 0:
-            print_stats(file_size, status_codes)
-except KeyboardInterrupt:
-    print_stats(file_size, status_codes)
-    raise
+    for line in sys.stdin:
+        line_list = line.split(" ")
+
+        if len(line_list) > 4:
+            status_code = line_list[-2]
+            file_size = int(line_list[-1])
+
+            # check if the status code receive exists in the dictionary and
+            # increment its count
+            if status_code in status_codes_dict.keys():
+                status_codes_dict[status_code] += 1
+
+            # update total size
+            total_size += file_size
+
+            # update count of lines
+            count += 1
+
+        if count == 10:
+            count = 0  # reset count
+            print('File size: {}'.format(total_size))
+
+            # print out status code counts
+            for key, value in sorted(status_codes_dict.items()):
+                if value != 0:
+                    print('{}: {}'.format(key, value))
+
+except Exception as err:
+    pass
+
+finally:
+    print('File size: {}'.format(total_size))
+    for key, value in sorted(status_codes_dict.items()):
+        if value != 0:
+            print('{}: {}'.format(key, value))
