@@ -38,7 +38,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 line_format = re.compile(r'^\S+ - \[\S+\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$')
 file_size = 0
-status_codes = {code: 0 for code in [200, 301, 400, 401, 403, 404, 405, 500]}
+status_codes = {}
 
 try:
     for i, line in enumerate(sys.stdin, 1):
@@ -46,8 +46,9 @@ try:
         if match:
             code, size = match.groups()
             file_size += int(size)
-            if int(code) in status_codes:
-                status_codes[int(code)] += 1
+            code = int(code)
+            if code in [200, 301, 400, 401, 403, 404, 405, 500]:
+                status_codes[code] = status_codes.get(code, 0) + 1
         if i % 10 == 0:
             print_stats(file_size, status_codes)
 except KeyboardInterrupt:
