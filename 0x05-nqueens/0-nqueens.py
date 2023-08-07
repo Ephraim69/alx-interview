@@ -1,53 +1,45 @@
 #!/usr/bin/python3
-
 """
-Solution for N-Queens problem
+N queens
 """
-
 import sys
 
-def valid_position(chessboard, x, y, size):
-    """
-    Check if a queen can be placed at (x, y) without being attacked.
-    """
-    for i in range(x):
-        if (chessboard[i] == y or 
-            chessboard[i] - i == y - x or 
-            chessboard[i] + i == y + x):
-            return False
-    return True
 
-def solve(chessboard, x, size):
-    """
-    Recursively attempt to place a queen in a valid spot.
-    """
-    if x == size:
-        print([[i, chessboard[i]] for i in range(size)])
+def is_safe(board, row, col, n):
+    return not any(
+        board[i] == col or abs(board[i] - col) == abs(i - row)
+        for i in range(row)
+    )
+
+
+def n_queens_util(board, row, n):
+    # Recursive utility function to find all solutions to the N queens problem
+    if row == n:
+        print([[i, board[i]] for i in range(n)])
         return
 
-    for y in range(size):
-        if valid_position(chessboard, x, y, size):
-            chessboard[x] = y
-            solve(chessboard, x + 1, size)
+    for col in range(n):
+        if is_safe(board, row, col, n):
+            board[row] = col
+            n_queens_util(board, row + 1, n)
 
-def main(size):
-    """
-    Main function to kick off the solution.
-    """
-    if size < 4:
-        print("Size should be 4 or more.")
+
+def n_queens(n):
+    # Wrapper function to find all solutions to the N queens problem
+    if n < 4:
+        print("N must be at least 4")
         sys.exit(1)
-    
-    chessboard = [-1 for _ in range(size)]
-    solve(chessboard, 0, size)
+    board = [-1] * n
+    n_queens_util(board, 0, n)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print("Correct usage: script_name <board size>")
+        print("Usage: nqueens N")
         sys.exit(1)
     try:
-        board_size = int(sys.argv[1])
+        n = int(sys.argv[1])
     except ValueError:
-        print("Please provide a valid integer for the board size.")
+        print("N must be a number")
         sys.exit(1)
-    main(board_size)
+    n_queens(n)
