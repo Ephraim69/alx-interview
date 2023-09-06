@@ -1,58 +1,44 @@
 #!/usr/bin/python3
-
-def is_prime(n):
-    """
-    Check if a number is prime.
-    """
-    if n < 2:
-        return False
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
+"""
+Module: Game of choosing Prime numbers
+"""
 
 
-def get_next_prime(lst):
+def primeNumbers(n):
+    """Return list of prime numbers between 1 and n inclusive
+       Args:
+        n (int): upper boundary of range. lower boundary is always 1
     """
-    Return the next prime from the list.
+    primeNos = []
+    filtered = [True] * (n + 1)
+    for prime in range(2, n + 1):
+        if (filtered[prime]):
+            primeNos.append(prime)
+            for i in range(prime, n + 1, prime):
+                filtered[i] = False
+    return primeNos
+
+
+def isWinner(x, nums):
     """
-    for num in lst:
-        if is_prime(num):
-            return num
+    Determines winner of Prime Game
+    Args:
+        x (int): no. of rounds of game
+        nums (int): upper limit of range for each round
+    Return:
+        Name of winner (Maria or Ben) or None if winner cannot be found
+    """
+    if x is None or nums is None or x == 0 or nums == []:
+        return None
+    Maria = Ben = 0
+    for i in range(x):
+        primeNos = primeNumbers(nums[i])
+        if len(primeNos) % 2 == 0:
+            Ben += 1
+        else:
+            Maria += 1
+    if Maria > Ben:
+        return 'Maria'
+    elif Ben > Maria:
+        return 'Ben'
     return None
-
-
-def is_winner(x, nums):
-    """
-    Determine the winner of the prime game over x rounds with nums as rounds.
-    """
-    winners = []
-
-    for n in nums:
-        numbers = set(range(2, n + 1))
-        turn = "Maria"
-
-        while True:
-            prime = get_next_prime(numbers)
-            if prime is None:
-                winners.append("Ben" if turn == "Maria" else "Maria")
-                break
-
-            multiples = set(range(prime, n + 1, prime))
-            numbers -= multiples
-
-            turn = "Ben" if turn == "Maria" else "Maria"
-
-    maria_wins = winners.count("Maria")
-    ben_wins = winners.count("Ben")
-
-    if maria_wins > ben_wins:
-        return "Maria"
-    elif ben_wins > maria_wins:
-        return "Ben"
-    return None
-
-
-# For testing
-if __name__ == "__main__":
-    print("Winner: {}".format(is_winner(5, [2, 5, 1, 4, 3])))
