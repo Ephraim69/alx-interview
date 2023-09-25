@@ -1,42 +1,42 @@
 #!/usr/bin/python3
+"""
+Displays the
+stats from the stdin
+"""
+import re
 import sys
-import signal
+status_codes = {200: 0, 301: 0, 400: 0, 401: 0,
+                403: 0, 404: 0, 405: 0, 500: 0}
+print_counter = 0
+size_summation = 0
 
-# Dictionary to keep track of status codes
-status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0, "404": 0, "405": 0, "500": 0}
-total_size = 0
-lines_counter = 0
 
-def print_stats(signal=None, frame=None):
-    """ Print statistics """
-    print("File size:", total_size)
-    for key, value in sorted(status_codes.items()):
-        if value > 0:
-            print("{}: {}".format(key, value))
-    if signal is not None:
-        sys.exit()
+def print_logs():
+    """
+    Prints status codes 
+    """
+    print(f"File size: {size_summation}")
+    for k, v in sorted(status_codes.items()):
+        if v != 0:
+            print(f"{k}: {v}")
 
-# Handle CTRL + C
-signal.signal(signal.SIGINT, print_stats)
 
-try:
-    for line in sys.stdin:
-        parts = line.split()
-        try:
-            size = int(parts[-1])
-            status = parts[-2]
-            if status in status_codes:
-                status_codes[status] += 1
-            total_size += size
-        except:
-            pass
-
-        lines_counter += 1
-        if lines_counter % 10 == 0:
-            print_stats()
-
-except KeyboardInterrupt:
-    pass
-
-finally:
-    print_stats()
+if __name__ == "__main__":
+    try:
+        for line in sys.stdin:
+            std_line = line.replace("\n", "")
+            log_list = re.split('- | "|" | " " ', str(std_line))
+            try:
+                codes = log_list[-1].split(" ")
+                if int(codes[0]) not in status_codes.keys():
+                    continue
+                status_codes[int(codes[0])] += 1
+                print_counter += 1
+                size_summation += int(codes[1])
+                if print_counter % 10 == 0:
+                    print_logs()
+            except:
+                pass
+        print_logs()
+    except KeyboardInterrupt:
+        print_logs()
