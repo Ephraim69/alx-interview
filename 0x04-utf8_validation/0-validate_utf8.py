@@ -9,7 +9,7 @@ def validUTF8(data):
     Determines if a given data set represents a valid UTF-8 encoding.
 
     Args:
-        data (list of int): Each integer represents 1 byte of data, 
+        data (list of int): Each integer represents 1 byte of data,
                             only the 8 least significant bits are considered.
 
     Returns:
@@ -43,5 +43,5 @@ def validUTF8(data):
                 return False
         num_bytes -= 1
 
-    # This is for the case where the last UTF-8 character might have been cut off
+    # This is for the case where the last char might have been cut off
     return num_bytes == 0
